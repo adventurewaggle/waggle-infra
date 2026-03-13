@@ -1,0 +1,15 @@
+{
+  "status": "pending",
+  "profile": {
+    "business_name": "Test Co",
+    "industry": "retail",
+    "primary_pain": "too much admin",
+    "channels": [
+      "email"
+    ],
+    "tone": "casual",
+    "recommended_tier": "400"
+  },
+  "receipt_id": "d24e23f0-e1bb-48b1-ae33-edc2ef43af17",
+  "timestamp": "2026-03-13T03:40:57.898504+00:00"
+}
