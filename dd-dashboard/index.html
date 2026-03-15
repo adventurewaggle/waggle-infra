@@ -1,1 +1,1180 @@
-<html><body>DD Dashboard placeholder</body></html>
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Waggle Logic — Due Diligence</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0f1729;
+    --navy-mid: #1a2744;
+    --navy-light: #243358;
+    --amber: #f59e0b;
+    --amber-dim: #d97706;
+    --amber-pale: #fef3c7;
+    --red: #ef4444;
+    --green: #22c55e;
+    --blue: #60a5fa;
+    --text: #e2e8f0;
+    --text-dim: #94a3b8;
+    --border: rgba(255,255,255,0.08);
+    --card: rgba(26,39,68,0.8);
+  }
+
+- { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+background: var(–navy);
+color: var(–text);
+font-family: ‘DM Sans’, sans-serif;
+min-height: 100vh;
+overflow-x: hidden;
+}
+
+/* Hex grid background */
+body::before {
+content: ‘’;
+position: fixed;
+inset: 0;
+background-image: url(“data:image/svg+xml,%3Csvg xmlns=‘http://www.w3.org/2000/svg’ width=‘56’ height=‘100’%3E%3Cpath d=‘M28 66L0 50V18L28 2l28 16v32L28 66zm0-6l22-12.7V24.7L28 12 6 24.7v22.6L28 60z’ fill=‘none’ stroke=‘rgba(245,158,11,0.04)’ stroke-width=‘1’/%3E%3C/svg%3E”);
+pointer-events: none;
+z-index: 0;
+}
+
+.container {
+max-width: 1100px;
+margin: 0 auto;
+padding: 0 24px;
+position: relative;
+z-index: 1;
+}
+
+/* Header */
+header {
+padding: 24px 0;
+border-bottom: 1px solid var(–border);
+display: flex;
+align-items: center;
+justify-content: space-between;
+}
+
+.logo {
+display: flex;
+align-items: center;
+gap: 10px;
+}
+
+.logo-bee {
+width: 36px;
+height: 36px;
+}
+
+.logo-text {
+font-family: ‘Instrument Serif’, serif;
+font-size: 1.3rem;
+color: var(–amber);
+letter-spacing: -0.02em;
+}
+
+.logo-sub {
+font-size: 0.7rem;
+color: var(–text-dim);
+font-family: ‘DM Mono’, monospace;
+letter-spacing: 0.1em;
+text-transform: uppercase;
+margin-top: 2px;
+}
+
+.header-right {
+display: flex;
+align-items: center;
+gap: 16px;
+}
+
+.badge {
+font-family: ‘DM Mono’, monospace;
+font-size: 0.65rem;
+padding: 4px 10px;
+border-radius: 20px;
+letter-spacing: 0.08em;
+text-transform: uppercase;
+}
+
+.badge-amber {
+background: rgba(245,158,11,0.15);
+color: var(–amber);
+border: 1px solid rgba(245,158,11,0.3);
+}
+
+/* Hero search */
+.hero {
+padding: 60px 0 40px;
+text-align: center;
+}
+
+.hero-label {
+font-family: ‘DM Mono’, monospace;
+font-size: 0.7rem;
+letter-spacing: 0.15em;
+text-transform: uppercase;
+color: var(–amber);
+margin-bottom: 16px;
+}
+
+.hero-title {
+font-family: ‘Instrument Serif’, serif;
+font-size: clamp(2rem, 5vw, 3.2rem);
+font-weight: 400;
+line-height: 1.1;
+margin-bottom: 12px;
+color: var(–text);
+}
+
+.hero-title em {
+font-style: italic;
+color: var(–amber);
+}
+
+.hero-sub {
+color: var(–text-dim);
+font-size: 0.95rem;
+margin-bottom: 40px;
+max-width: 500px;
+margin-left: auto;
+margin-right: auto;
+line-height: 1.6;
+}
+
+.search-bar {
+display: flex;
+gap: 0;
+max-width: 600px;
+margin: 0 auto;
+background: var(–navy-mid);
+border: 1px solid var(–border);
+border-radius: 12px;
+overflow: hidden;
+transition: border-color 0.2s;
+}
+
+.search-bar:focus-within {
+border-color: rgba(245,158,11,0.4);
+box-shadow: 0 0 0 3px rgba(245,158,11,0.08);
+}
+
+.search-input {
+flex: 1;
+background: none;
+border: none;
+padding: 16px 20px;
+color: var(–text);
+font-family: ‘DM Sans’, sans-serif;
+font-size: 0.95rem;
+outline: none;
+}
+
+.search-input::placeholder { color: var(–text-dim); }
+
+.search-btn {
+background: var(–amber);
+border: none;
+padding: 16px 28px;
+color: var(–navy);
+font-family: ‘DM Sans’, sans-serif;
+font-size: 0.9rem;
+font-weight: 600;
+cursor: pointer;
+transition: background 0.2s;
+letter-spacing: 0.02em;
+}
+
+.search-btn:hover { background: var(–amber-dim); }
+
+.search-examples {
+margin-top: 14px;
+font-size: 0.8rem;
+color: var(–text-dim);
+}
+
+.search-examples span {
+color: var(–amber);
+cursor: pointer;
+font-family: ‘DM Mono’, monospace;
+font-size: 0.75rem;
+}
+
+.search-examples span:hover { text-decoration: underline; }
+
+/* Loading state */
+.loading {
+display: none;
+text-align: center;
+padding: 60px 0;
+}
+
+.loading.active { display: block; }
+
+.loading-grid {
+display: flex;
+justify-content: center;
+gap: 8px;
+margin-bottom: 20px;
+}
+
+.loading-hex {
+width: 12px;
+height: 14px;
+background: var(–amber);
+clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+animation: hexPulse 1.2s ease-in-out infinite;
+}
+
+.loading-hex:nth-child(2) { animation-delay: 0.2s; opacity: 0.7; }
+.loading-hex:nth-child(3) { animation-delay: 0.4s; opacity: 0.5; }
+
+@keyframes hexPulse {
+0%, 100% { transform: scaleY(1); opacity: 1; }
+50% { transform: scaleY(0.6); opacity: 0.3; }
+}
+
+.loading-text {
+font-family: ‘DM Mono’, monospace;
+font-size: 0.8rem;
+color: var(–text-dim);
+letter-spacing: 0.05em;
+}
+
+.loading-steps {
+margin-top: 16px;
+display: flex;
+flex-direction: column;
+gap: 6px;
+align-items: center;
+}
+
+.loading-step {
+font-family: ‘DM Mono’, monospace;
+font-size: 0.72rem;
+color: var(–text-dim);
+opacity: 0;
+animation: fadeStep 0.5s forwards;
+}
+
+.loading-step.done { color: var(–green); }
+.loading-step:nth-child(1) { animation-delay: 0.3s; }
+.loading-step:nth-child(2) { animation-delay: 1.0s; }
+.loading-step:nth-child(3) { animation-delay: 1.8s; }
+.loading-step:nth-child(4) { animation-delay: 2.5s; }
+
+@keyframes fadeStep {
+to { opacity: 1; }
+}
+
+/* Results */
+.results {
+display: none;
+padding-bottom: 80px;
+}
+
+.results.active { display: block; }
+
+/* Risk score hero */
+.risk-hero {
+display: grid;
+grid-template-columns: 1fr auto;
+gap: 24px;
+background: var(–card);
+border: 1px solid var(–border);
+border-radius: 16px;
+padding: 32px;
+margin-bottom: 24px;
+backdrop-filter: blur(10px);
+position: relative;
+overflow: hidden;
+}
+
+.risk-hero::before {
+content: ‘’;
+position: absolute;
+top: 0; right: 0;
+width: 200px; height: 200px;
+background: radial-gradient(circle, rgba(245,158,11,0.06) 0%, transparent 70%);
+pointer-events: none;
+}
+
+.company-name {
+font-family: ‘Instrument Serif’, serif;
+font-size: 1.8rem;
+font-weight: 400;
+color: var(–text);
+margin-bottom: 6px;
+}
+
+.company-meta {
+display: flex;
+gap: 16px;
+flex-wrap: wrap;
+margin-bottom: 16px;
+}
+
+.meta-item {
+display: flex;
+align-items: center;
+gap: 6px;
+font-size: 0.82rem;
+color: var(–text-dim);
+font-family: ‘DM Mono’, monospace;
+}
+
+.meta-dot {
+width: 6px; height: 6px;
+border-radius: 50%;
+background: var(–green);
+}
+
+.meta-dot.amber { background: var(–amber); }
+.meta-dot.red { background: var(–red); }
+
+.risk-badge-container {
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+gap: 8px;
+}
+
+.risk-score {
+width: 90px;
+height: 90px;
+border-radius: 50%;
+display: flex;
+align-items: center;
+justify-content: center;
+flex-direction: column;
+border: 3px solid;
+position: relative;
+}
+
+.risk-score.low {
+border-color: var(–green);
+background: rgba(34,197,94,0.08);
+box-shadow: 0 0 20px rgba(34,197,94,0.15);
+}
+
+.risk-score.medium {
+border-color: var(–amber);
+background: rgba(245,158,11,0.08);
+box-shadow: 0 0 20px rgba(245,158,11,0.15);
+}
+
+.risk-score.high {
+border-color: var(–red);
+background: rgba(239,68,68,0.08);
+box-shadow: 0 0 20px rgba(239,68,68,0.15);
+}
+
+.risk-number {
+font-family: ‘Instrument Serif’, serif;
+font-size: 2rem;
+line-height: 1;
+}
+
+.risk-score.low .risk-number { color: var(–green); }
+.risk-score.medium .risk-number { color: var(–amber); }
+.risk-score.high .risk-number { color: var(–red); }
+
+.risk-label {
+font-family: ‘DM Mono’, monospace;
+font-size: 0.6rem;
+letter-spacing: 0.1em;
+text-transform: uppercase;
+color: var(–text-dim);
+}
+
+.risk-verdict {
+font-family: ‘DM Mono’, monospace;
+font-size: 0.65rem;
+letter-spacing: 0.08em;
+text-transform: uppercase;
+text-align: center;
+}
+
+.risk-verdict.low { color: var(–green); }
+.risk-verdict.medium { color: var(–amber); }
+.risk-verdict.high { color: var(–red); }
+
+/* Summary flags */
+.flags {
+display: flex;
+gap: 10px;
+flex-wrap: wrap;
+margin-top: 12px;
+}
+
+.flag {
+display: flex;
+align-items: center;
+gap: 6px;
+padding: 5px 12px;
+border-radius: 20px;
+font-size: 0.75rem;
+font-family: ‘DM Mono’, monospace;
+letter-spacing: 0.03em;
+}
+
+.flag.clear {
+background: rgba(34,197,94,0.1);
+color: var(–green);
+border: 1px solid rgba(34,197,94,0.2);
+}
+
+.flag.warning {
+background: rgba(245,158,11,0.1);
+color: var(–amber);
+border: 1px solid rgba(245,158,11,0.2);
+}
+
+.flag.alert {
+background: rgba(239,68,68,0.1);
+color: var(–red);
+border: 1px solid rgba(239,68,68,0.2);
+}
+
+/* Grid layout */
+.grid-2 {
+display: grid;
+grid-template-columns: 1fr 1fr;
+gap: 16px;
+margin-bottom: 16px;
+}
+
+@media (max-width: 700px) {
+.grid-2 { grid-template-columns: 1fr; }
+.risk-hero { grid-template-columns: 1fr; }
+}
+
+/* Cards */
+.card {
+background: var(–card);
+border: 1px solid var(–border);
+border-radius: 12px;
+padding: 24px;
+backdrop-filter: blur(10px);
+}
+
+.card-title {
+font-family: ‘DM Mono’, monospace;
+font-size: 0.68rem;
+letter-spacing: 0.12em;
+text-transform: uppercase;
+color: var(–amber);
+margin-bottom: 16px;
+display: flex;
+align-items: center;
+gap: 8px;
+}
+
+.card-title::after {
+content: ‘’;
+flex: 1;
+height: 1px;
+background: var(–border);
+}
+
+/* Data rows */
+.data-row {
+display: flex;
+justify-content: space-between;
+align-items: flex-start;
+padding: 10px 0;
+border-bottom: 1px solid var(–border);
+gap: 16px;
+}
+
+.data-row:last-child { border-bottom: none; }
+
+.data-label {
+font-size: 0.8rem;
+color: var(–text-dim);
+min-width: 120px;
+font-family: ‘DM Mono’, monospace;
+}
+
+.data-value {
+font-size: 0.85rem;
+color: var(–text);
+text-align: right;
+flex: 1;
+}
+
+.data-value.green { color: var(–green); }
+.data-value.amber { color: var(–amber); }
+.data-value.red { color: var(–red); }
+
+/* Director table */
+.director-row {
+display: flex;
+justify-content: space-between;
+align-items: center;
+padding: 12px 0;
+border-bottom: 1px solid var(–border);
+}
+
+.director-row:last-child { border-bottom: none; }
+
+.director-name {
+font-size: 0.88rem;
+font-weight: 500;
+color: var(–text);
+}
+
+.director-since {
+font-size: 0.75rem;
+color: var(–text-dim);
+font-family: ‘DM Mono’, monospace;
+margin-top: 2px;
+}
+
+.director-status {
+display: flex;
+gap: 6px;
+}
+
+/* Register checks */
+.register-grid {
+display: grid;
+grid-template-columns: 1fr 1fr;
+gap: 10px;
+}
+
+.register-item {
+display: flex;
+align-items: center;
+gap: 10px;
+padding: 12px;
+background: rgba(255,255,255,0.02);
+border-radius: 8px;
+border: 1px solid var(–border);
+}
+
+.register-icon {
+width: 32px;
+height: 32px;
+border-radius: 8px;
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 0.9rem;
+flex-shrink: 0;
+}
+
+.register-icon.clear { background: rgba(34,197,94,0.1); }
+.register-icon.flag { background: rgba(239,68,68,0.1); }
+
+.register-name {
+font-size: 0.78rem;
+color: var(–text);
+font-weight: 500;
+}
+
+.register-result {
+font-size: 0.7rem;
+color: var(–text-dim);
+font-family: ‘DM Mono’, monospace;
+margin-top: 2px;
+}
+
+.register-result.clear { color: var(–green); }
+.register-result.flagged { color: var(–red); }
+
+/* Timeline */
+.timeline {
+position: relative;
+padding-left: 20px;
+}
+
+.timeline::before {
+content: ‘’;
+position: absolute;
+left: 6px; top: 6px; bottom: 6px;
+width: 1px;
+background: var(–border);
+}
+
+.timeline-item {
+position: relative;
+padding: 0 0 16px 16px;
+}
+
+.timeline-item::before {
+content: ‘’;
+position: absolute;
+left: -8px;
+top: 5px;
+width: 8px; height: 8px;
+border-radius: 50%;
+background: var(–amber);
+border: 2px solid var(–navy);
+}
+
+.timeline-date {
+font-family: ‘DM Mono’, monospace;
+font-size: 0.68rem;
+color: var(–amber);
+margin-bottom: 3px;
+}
+
+.timeline-event {
+font-size: 0.83rem;
+color: var(–text);
+}
+
+.timeline-detail {
+font-size: 0.75rem;
+color: var(–text-dim);
+margin-top: 2px;
+}
+
+/* AI summary */
+.ai-summary {
+background: linear-gradient(135deg, rgba(245,158,11,0.06) 0%, rgba(26,39,68,0.8) 100%);
+border: 1px solid rgba(245,158,11,0.2);
+border-radius: 12px;
+padding: 24px;
+margin-bottom: 16px;
+position: relative;
+overflow: hidden;
+}
+
+.ai-summary::before {
+content: ‘🐝’;
+position: absolute;
+right: 20px; top: 20px;
+font-size: 1.5rem;
+opacity: 0.3;
+}
+
+.ai-summary-label {
+font-family: ‘DM Mono’, monospace;
+font-size: 0.65rem;
+letter-spacing: 0.15em;
+text-transform: uppercase;
+color: var(–amber);
+margin-bottom: 10px;
+}
+
+.ai-summary-text {
+font-size: 0.9rem;
+line-height: 1.7;
+color: var(–text);
+font-style: italic;
+font-family: ‘Instrument Serif’, serif;
+font-size: 1rem;
+}
+
+/* Actions */
+.actions {
+display: flex;
+gap: 12px;
+margin-top: 24px;
+flex-wrap: wrap;
+}
+
+.btn {
+padding: 11px 22px;
+border-radius: 8px;
+font-family: ‘DM Sans’, sans-serif;
+font-size: 0.85rem;
+font-weight: 500;
+cursor: pointer;
+border: none;
+transition: all 0.2s;
+letter-spacing: 0.02em;
+}
+
+.btn-primary {
+background: var(–amber);
+color: var(–navy);
+}
+
+.btn-primary:hover { background: var(–amber-dim); transform: translateY(-1px); }
+
+.btn-secondary {
+background: transparent;
+color: var(–text);
+border: 1px solid var(–border);
+}
+
+.btn-secondary:hover { border-color: rgba(255,255,255,0.2); background: rgba(255,255,255,0.04); }
+
+/* Receipt */
+.receipt-strip {
+display: flex;
+align-items: center;
+justify-content: space-between;
+padding: 12px 16px;
+background: rgba(255,255,255,0.02);
+border: 1px solid var(–border);
+border-radius: 8px;
+margin-top: 16px;
+}
+
+.receipt-id {
+font-family: ‘DM Mono’, monospace;
+font-size: 0.68rem;
+color: var(–text-dim);
+}
+
+.receipt-id span { color: var(–amber); }
+
+.receipt-hash {
+font-family: ‘DM Mono’, monospace;
+font-size: 0.62rem;
+color: var(–text-dim);
+opacity: 0.6;
+}
+
+/* Powered by */
+.powered {
+text-align: center;
+padding: 20px 0;
+font-family: ‘DM Mono’, monospace;
+font-size: 0.65rem;
+color: var(–text-dim);
+opacity: 0.5;
+letter-spacing: 0.08em;
+}
+
+/* Tooltip */
+.tooltip {
+position: relative;
+cursor: help;
+}
+
+.tooltip:hover::after {
+content: attr(data-tip);
+position: absolute;
+bottom: 100%;
+left: 50%;
+transform: translateX(-50%);
+background: var(–navy-light);
+border: 1px solid var(–border);
+padding: 6px 10px;
+border-radius: 6px;
+font-size: 0.72rem;
+white-space: nowrap;
+color: var(–text);
+z-index: 10;
+margin-bottom: 6px;
+}
+</style>
+
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <div class="logo">
+      <svg class="logo-bee" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="32" cy="32" r="32" fill="#1a2744"/>
+        <ellipse cx="18" cy="22" rx="11" ry="6" fill="#93c5fd" opacity="0.7" transform="rotate(-20 18 22)"/>
+        <ellipse cx="46" cy="22" rx="11" ry="6" fill="#93c5fd" opacity="0.7" transform="rotate(20 46 22)"/>
+        <ellipse cx="32" cy="36" rx="10" ry="14" fill="#f59e0b"/>
+        <rect x="22" y="28" width="20" height="4" rx="2" fill="#1a2744"/>
+        <rect x="22" y="35" width="20" height="4" rx="2" fill="#1a2744"/>
+        <rect x="22" y="42" width="20" height="4" rx="2" fill="#1a2744"/>
+        <circle cx="32" cy="22" r="8" fill="#f59e0b"/>
+        <circle cx="29" cy="21" r="2" fill="#1a2744"/>
+        <circle cx="35" cy="21" r="2" fill="#1a2744"/>
+        <circle cx="25" cy="9" r="2" fill="#f59e0b"/>
+        <circle cx="39" cy="9" r="2" fill="#f59e0b"/>
+        <line x1="29" y1="15" x2="25" y2="9" stroke="#1a2744" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="35" y1="15" x2="39" y2="9" stroke="#1a2744" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      <div>
+        <div class="logo-text">Waggle Logic</div>
+        <div class="logo-sub">Due Diligence</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <span class="badge badge-amber">NZ Register</span>
+    </div>
+  </header>
+
+  <div class="hero">
+    <div class="hero-label">⬡ Powered by NZ Government APIs</div>
+    <h1 class="hero-title">Know who you're dealing with.<br><em>Before you deal with them.</em></h1>
+    <p class="hero-sub">Instant due diligence on any NZ company or director. Cross-references Companies Register, Insolvency, PPSR, and Disqualified Directors in seconds.</p>
+
+```
+<div class="search-bar">
+  <input class="search-input" id="searchInput" type="text" placeholder="Company name, NZBN, or director name..." />
+  <button class="search-btn" onclick="runSearch()">Search →</button>
+</div>
+<div class="search-examples">
+  Try: <span onclick="demoSearch('Forensic Insight Limited')">Forensic Insight Limited</span> &nbsp;·&nbsp;
+  <span onclick="demoSearch('Smith Building Co')">Smith Building Co</span> &nbsp;·&nbsp;
+  <span onclick="demoSearch('Adventure Waggle Limited')">Adventure Waggle Limited</span>
+</div>
+```
+
+  </div>
+
+  <div class="loading" id="loading">
+    <div class="loading-grid">
+      <div class="loading-hex"></div>
+      <div class="loading-hex"></div>
+      <div class="loading-hex"></div>
+    </div>
+    <div class="loading-text">Running due diligence...</div>
+    <div class="loading-steps">
+      <div class="loading-step">✓ Companies Register — searched</div>
+      <div class="loading-step">✓ Disqualified Directors — checked</div>
+      <div class="loading-step">✓ Insolvency Register — checked</div>
+      <div class="loading-step">✓ PPSR — searched · AI analysis complete</div>
+    </div>
+  </div>
+
+  <div class="results" id="results">
+
+```
+<div class="ai-summary">
+  <div class="ai-summary-label">⬡ Waggle AI Assessment</div>
+  <div class="ai-summary-text" id="aiSummary"></div>
+</div>
+
+<div class="risk-hero">
+  <div>
+    <div class="company-name" id="companyName"></div>
+    <div class="company-meta" id="companyMeta"></div>
+    <div class="flags" id="companyFlags"></div>
+  </div>
+  <div class="risk-badge-container">
+    <div class="risk-score" id="riskScore">
+      <div class="risk-number" id="riskNumber"></div>
+      <div class="risk-label">Risk Score</div>
+    </div>
+    <div class="risk-verdict" id="riskVerdict"></div>
+  </div>
+</div>
+
+<div class="grid-2">
+  <div class="card">
+    <div class="card-title">Company Details</div>
+    <div id="companyDetails"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Directors</div>
+    <div id="directors"></div>
+  </div>
+</div>
+
+<div class="card" style="margin-bottom:16px">
+  <div class="card-title">Register Checks</div>
+  <div class="register-grid" id="registerChecks"></div>
+</div>
+
+<div class="grid-2">
+  <div class="card">
+    <div class="card-title">Company History</div>
+    <div class="timeline" id="timeline"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">PPSR Security Interests</div>
+    <div id="ppsr"></div>
+  </div>
+</div>
+
+<div class="actions">
+  <button class="btn btn-primary" onclick="downloadReport()">Download PDF Report</button>
+  <button class="btn btn-secondary" onclick="newSearch()">New Search</button>
+  <button class="btn btn-secondary">Share Report</button>
+</div>
+
+<div class="receipt-strip">
+  <div class="receipt-id">Receipt: <span id="receiptId"></span></div>
+  <div class="receipt-hash" id="receiptHash"></div>
+</div>
+```
+
+  </div>
+
+  <div class="powered">Waggle Logic · Due Diligence Engine · NZ Companies Office Data · NZBN API</div>
+</div>
+
+<script>
+  const MOCK_DATA = {
+    "Forensic Insight Limited": {
+      name: "Forensic Insight Limited",
+      nzbn: "9429041234567",
+      status: "REGISTERED",
+      incorporated: "2008-03-14",
+      industry: "Forensic Services",
+      anzsic: "7291",
+      address: "Albany, Auckland",
+      employees: "1-5",
+      riskScore: 2,
+      riskLevel: "low",
+      riskVerdict: "LOW RISK",
+      aiSummary: "Forensic Insight Limited presents a clean risk profile. The company has been continuously registered since 2008 with no insolvency events, no director disqualifications, and no PPSR security interests recorded. Director Thomas Coyle MNZM has a strong professional standing with no adverse register findings. The company's 16-year operating history in forensic services indicates stability. Recommend as suitable for commercial engagement.",
+      flags: [
+        { type: "clear", text: "No insolvency events" },
+        { type: "clear", text: "Directors clear" },
+        { type: "clear", text: "No PPSR interests" },
+        { type: "warning", text: "Single director" }
+      ],
+      details: [
+        { label: "NZBN", value: "9429-0412-3456-7" },
+        { label: "Status", value: "Registered", cls: "green" },
+        { label: "Incorporated", value: "14 March 2008" },
+        { label: "Company Type", value: "NZ Limited Company" },
+        { label: "Address", value: "Albany, Auckland 0632" },
+        { label: "ANZSIC Code", value: "7291 — Forensic Services" },
+        { label: "GST Registered", value: "Yes", cls: "green" }
+      ],
+      directors: [
+        { name: "Thomas Coyle MNZM", since: "Director since 2008", flags: ["clear"] }
+      ],
+      registers: [
+        { name: "Companies Register", result: "Registered · Active", status: "clear", icon: "🏢" },
+        { name: "Disqualified Directors", result: "No matches found", status: "clear", icon: "👤" },
+        { name: "Insolvency Register", result: "No insolvency events", status: "clear", icon: "📋" },
+        { name: "PPSR Register", result: "No security interests", status: "clear", icon: "🔒" }
+      ],
+      timeline: [
+        { date: "Mar 2008", event: "Company incorporated", detail: "Registered as NZ Limited Company" },
+        { date: "2009", event: "GST registration", detail: "Registered for GST" },
+        { date: "2012", event: "Address update", detail: "Moved to Albany, Auckland" },
+        { date: "2019", event: "Director awarded MNZM", detail: "Thomas Coyle receives MNZM" },
+        { date: "2024", event: "Annual return filed", detail: "Compliance up to date" }
+      ],
+      ppsr: [
+        { label: "Security Interests", value: "0 registered", cls: "green" },
+        { label: "Financing Statements", value: "None found", cls: "green" },
+        { label: "Last Checked", value: "Today", cls: "" }
+      ]
+    },
+    "Adventure Waggle Limited": {
+      name: "Adventure Waggle Limited",
+      nzbn: "9429060000001",
+      status: "REGISTERED",
+      incorporated: "2021-06-15",
+      industry: "Technology Services",
+      anzsic: "7000",
+      address: "Auckland, New Zealand",
+      employees: "1-5",
+      riskScore: 3,
+      riskLevel: "low",
+      riskVerdict: "LOW RISK",
+      aiSummary: "Adventure Waggle Limited is a recently incorporated technology services company with a clean compliance record. No adverse findings across all four registers. The company's relatively short operating history (3 years) is the primary risk factor, which is typical for early-stage technology ventures. No insolvency events, no director disqualifications, and no PPSR security interests recorded.",
+      flags: [
+        { type: "clear", text: "No insolvency events" },
+        { type: "clear", text: "Directors clear" },
+        { type: "warning", text: "Incorporated 2021" },
+        { type: "clear", text: "No PPSR interests" }
+      ],
+      details: [
+        { label: "NZBN", value: "9429-0600-0000-1" },
+        { label: "Status", value: "Registered", cls: "green" },
+        { label: "Incorporated", value: "15 June 2021" },
+        { label: "Company Type", value: "NZ Limited Company" },
+        { label: "Address", value: "Auckland, New Zealand" },
+        { label: "ANZSIC Code", value: "7000 — Technology Services" },
+        { label: "GST Registered", value: "Pending verification" }
+      ],
+      directors: [
+        { name: "Derek Winer", since: "Director since 2021", flags: ["clear"] }
+      ],
+      registers: [
+        { name: "Companies Register", result: "Registered · Active", status: "clear", icon: "🏢" },
+        { name: "Disqualified Directors", result: "No matches found", status: "clear", icon: "👤" },
+        { name: "Insolvency Register", result: "No insolvency events", status: "clear", icon: "📋" },
+        { name: "PPSR Register", result: "No security interests", status: "clear", icon: "🔒" }
+      ],
+      timeline: [
+        { date: "Jun 2021", event: "Company incorporated", detail: "Adventure Waggle Limited registered" },
+        { date: "2022", event: "IRD registration", detail: "Tax registration confirmed" },
+        { date: "2024", event: "Annual return filed", detail: "Compliance up to date" }
+      ],
+      ppsr: [
+        { label: "Security Interests", value: "0 registered", cls: "green" },
+        { label: "Financing Statements", value: "None found", cls: "green" },
+        { label: "Last Checked", value: "Today" }
+      ]
+    }
+  };
+
+  const DEFAULT_MOCK = {
+    name: "Smith Building Co Limited",
+    nzbn: "9429099887766",
+    status: "REGISTERED",
+    incorporated: "2015-07-22",
+    industry: "Construction",
+    anzsic: "3000",
+    address: "Hamilton, Waikato",
+    riskScore: 6,
+    riskLevel: "medium",
+    riskVerdict: "REVIEW REQUIRED",
+    aiSummary: "Smith Building Co Limited shows a mixed risk profile requiring further review. While the company remains actively registered, one PPSR security interest is recorded against company assets (registered 2022, holder: ANZ Bank NZ Ltd). No insolvency events or director disqualifications found. The PPSR interest is consistent with standard business financing but should be reviewed in context of the proposed transaction.",
+    flags: [
+      { type: "clear", text: "No insolvency events" },
+      { type: "clear", text: "Directors clear" },
+      { type: "warning", text: "1 PPSR interest" },
+      { type: "warning", text: "2 directors — 1 recent" }
+    ],
+    details: [
+      { label: "NZBN", value: "9429-0998-8776-6" },
+      { label: "Status", value: "Registered", cls: "green" },
+      { label: "Incorporated", value: "22 July 2015" },
+      { label: "Company Type", value: "NZ Limited Company" },
+      { label: "Address", value: "Hamilton, Waikato 3200" },
+      { label: "ANZSIC Code", value: "3000 — Construction" },
+      { label: "GST Registered", value: "Yes", cls: "green" }
+    ],
+    directors: [
+      { name: "John R. Smith", since: "Director since 2015", flags: ["clear"] },
+      { name: "Sarah M. Jones", since: "Director since 2023", flags: ["warning"] }
+    ],
+    registers: [
+      { name: "Companies Register", result: "Registered · Active", status: "clear", icon: "🏢" },
+      { name: "Disqualified Directors", result: "No matches found", status: "clear", icon: "👤" },
+      { name: "Insolvency Register", result: "No insolvency events", status: "clear", icon: "📋" },
+      { name: "PPSR Register", result: "1 security interest found", status: "flag", icon: "⚠️" }
+    ],
+    timeline: [
+      { date: "Jul 2015", event: "Company incorporated", detail: "Smith Building Co registered" },
+      { date: "2018", event: "Revenue milestone", detail: "Expanded to 10+ staff" },
+      { date: "2022", event: "PPSR registered", detail: "ANZ Bank NZ Ltd — General Security Agreement" },
+      { date: "2023", event: "Director change", detail: "Sarah M. Jones appointed" },
+      { date: "2024", event: "Annual return filed", detail: "Compliance up to date" }
+    ],
+    ppsr: [
+      { label: "Security Interests", value: "1 registered", cls: "amber" },
+      { label: "Holder", value: "ANZ Bank NZ Ltd" },
+      { label: "Type", value: "General Security Agreement" },
+      { label: "Registered", value: "14 March 2022" }
+    ]
+  };
+
+  function generateReceiptId() {
+    return 'WL-DD-' + Math.random().toString(36).substr(2, 9).toUpperCase();
+  }
+
+  function generateHash() {
+    return Array.from({length: 16}, () => Math.floor(Math.random()*16).toString(16)).join('');
+  }
+
+  function demoSearch(name) {
+    document.getElementById('searchInput').value = name;
+    runSearch();
+  }
+
+  function runSearch() {
+    const query = document.getElementById('searchInput').value.trim();
+    if (!query) return;
+
+    document.getElementById('results').classList.remove('active');
+    document.getElementById('loading').classList.add('active');
+
+    setTimeout(() => {
+      document.getElementById('loading').classList.remove('active');
+      const data = MOCK_DATA[query] || { ...DEFAULT_MOCK, name: query };
+      renderResults(data);
+      document.getElementById('results').classList.add('active');
+      document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 3200);
+  }
+
+  function renderResults(d) {
+    document.getElementById('aiSummary').textContent = d.aiSummary;
+    document.getElementById('companyName').textContent = d.name;
+
+    const meta = document.getElementById('companyMeta');
+    meta.innerHTML = `
+      <div class="meta-item"><div class="meta-dot"></div> ${d.status}</div>
+      <div class="meta-item"><div class="meta-dot amber"></div> ${d.industry}</div>
+      <div class="meta-item"><div class="meta-dot"></div> Est. ${d.incorporated.split('-')[0]}</div>
+      <div class="meta-item"><div class="meta-dot"></div> ${d.address}</div>
+    `;
+
+    const score = document.getElementById('riskScore');
+    score.className = 'risk-score ' + d.riskLevel;
+    document.getElementById('riskNumber').textContent = d.riskScore;
+    const verdict = document.getElementById('riskVerdict');
+    verdict.textContent = d.riskVerdict;
+    verdict.className = 'risk-verdict ' + d.riskLevel;
+
+    const flags = document.getElementById('companyFlags');
+    flags.innerHTML = d.flags.map(f =>
+      `<div class="flag ${f.type}">${f.type === 'clear' ? '✓' : f.type === 'warning' ? '⚠' : '✗'} ${f.text}</div>`
+    ).join('');
+
+    const details = document.getElementById('companyDetails');
+    details.innerHTML = d.details.map(r =>
+      `<div class="data-row"><div class="data-label">${r.label}</div><div class="data-value ${r.cls||''}">${r.value}</div></div>`
+    ).join('');
+
+    const dirs = document.getElementById('directors');
+    dirs.innerHTML = d.directors.map(dir => `
+      <div class="director-row">
+        <div>
+          <div class="director-name">${dir.name}</div>
+          <div class="director-since">${dir.since}</div>
+        </div>
+        <div class="director-status">
+          ${dir.flags.map(f => `<span class="badge ${f === 'clear' ? 'badge-amber' : ''}" style="${f==='warning'?'background:rgba(245,158,11,0.15);color:#f59e0b;border:1px solid rgba(245,158,11,0.3);font-family:DM Mono,monospace;font-size:0.65rem;padding:4px 10px;border-radius:20px;letter-spacing:0.08em;':''}">
+            ${f === 'clear' ? '✓ Clear' : '⚠ Review'}
+          </span>`).join('')}
+        </div>
+      </div>
+    `).join('');
+
+    const regs = document.getElementById('registerChecks');
+    regs.innerHTML = d.registers.map(r => `
+      <div class="register-item">
+        <div class="register-icon ${r.status}">${r.icon}</div>
+        <div>
+          <div class="register-name">${r.name}</div>
+          <div class="register-result ${r.status}">${r.result}</div>
+        </div>
+      </div>
+    `).join('');
+
+    const tl = document.getElementById('timeline');
+    tl.innerHTML = d.timeline.map(t => `
+      <div class="timeline-item">
+        <div class="timeline-date">${t.date}</div>
+        <div class="timeline-event">${t.event}</div>
+        <div class="timeline-detail">${t.detail}</div>
+      </div>
+    `).join('');
+
+    const ppsr = document.getElementById('ppsr');
+    ppsr.innerHTML = d.ppsr.map(r =>
+      `<div class="data-row"><div class="data-label">${r.label}</div><div class="data-value ${r.cls||''}">${r.value}</div></div>`
+    ).join('');
+
+    const rid = generateReceiptId();
+    document.getElementById('receiptId').textContent = rid;
+    document.getElementById('receiptHash').textContent = 'sha256:' + generateHash() + '...';
+  }
+
+  function newSearch() {
+    document.getElementById('results').classList.remove('active');
+    document.getElementById('searchInput').value = '';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function downloadReport() {
+    alert('PDF export — wires to backend when live API keys arrive.');
+  }
+
+  document.getElementById('searchInput').addEventListener('keypress', e => {
+    if (e.key === 'Enter') runSearch();
+  });
+</script>
+
+</body>
+</html>
