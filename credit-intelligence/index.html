@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Waggle Logic -- Credit Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@300;400;500&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #0d1117;
+  --ink-mid: #161b22;
+  --ink-light: #21262d;
+  --amber: #f59e0b;
+  --amber-dim: #d97706;
+  --red: #f85149;
+  --blue: #58a6ff;
+  --text: #c9d1d9;
+  --text-dim: #8b949e;
+  --border: rgba(255,255,255,0.06);
+  --card: rgba(22,27,34,0.9);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+background: var(--ink);
+color: var(--text);
+font-family: 'DM Mono', monospace;
+min-height: 100vh;
+overflow-x: hidden;
+}
+
+/* Grid texture */
+body::before {
+content: '';
+position: fixed;
+inset: 0;
+background-image:
+linear-gradient(rgba(245,158,11,0.03) 1px, transparent 1px),
+linear-gradient(90deg, rgba(245,158,11,0.03) 1px, transparent 1px);
+background-size: 40px 40px;
+pointer-events: none;
+z-index: 0;
+}
+
+.wrap {
+max-width: 1000px;
+margin: 0 auto;
+padding: 0 24px;
+position: relative;
+z-index: 1;
+}
+
+/* Header */
+header {
+padding: 28px 0 24px;
+border-bottom: 1px solid var(--border);
+display: flex;
+align-items: center;
+justify-content: space-between;
+}
+
+.brand {
+display: flex;
+align-items: center;
+gap: 12px;
+}
+
+.brand-icon {
+width: 38px; height: 38px;
+background: var(--amber);
+border-radius: 8px;
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 1.2rem;
+}
+
+.brand-name {
+font-family: 'Syne', sans-serif;
+font-weight: 700;
+font-size: 1rem;
+color: var(--text);
+letter-spacing: -0.02em;
+}
+
+.brand-sub {
+font-size: 0.62rem;
+color: var(--amber);
+letter-spacing: 0.12em;
+text-transform: uppercase;
+margin-top: 1px;
+}
+
+.header-badges {
+display: flex;
+gap: 8px;
+}
+
+.chip {
+font-size: 0.62rem;
+padding: 4px 10px;
+border-radius: 4px;
+letter-spacing: 0.08em;
+text-transform: uppercase;
+border: 1px solid;
+}
+
+.chip-amber { color: var(--amber); border-color: rgba(245,158,11,0.3); background: rgba(245,158,11,0.06); }
+.chip-green { color: var(--amber); border-color: rgba(245,158,11,0.3); background: rgba(245,158,11,0.06); }
+
+/* Hero */
+.hero {
+padding: 56px 0 40px;
+}
+
+.hero-eyebrow {
+font-size: 0.65rem;
+letter-spacing: 0.18em;
+text-transform: uppercase;
+color: var(--amber);
+margin-bottom: 16px;
+display: flex;
+align-items: center;
+gap: 8px;
+}
+
+.hero-eyebrow::before {
+content: '';
+width: 20px; height: 1px;
+background: var(--amber);
+}
+
+.hero-title {
+font-family: 'Syne', sans-serif;
+font-size: clamp(2.2rem, 6vw, 3.8rem);
+font-weight: 800;
+line-height: 1.0;
+letter-spacing: -0.03em;
+color: #fff;
+margin-bottom: 16px;
+}
+
+.hero-title span {
+color: var(--amber);
+font-style: italic;
+font-family: 'Lora', serif;
+font-weight: 400;
+}
+
+.hero-sub {
+font-size: 0.85rem;
+color: var(--text-dim);
+line-height: 1.7;
+max-width: 520px;
+margin-bottom: 40px;
+}
+
+/* Search */
+.search-wrap {
+background: var(--ink-mid);
+border: 1px solid var(--border);
+border-radius: 10px;
+overflow: hidden;
+display: flex;
+max-width: 680px;
+transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.search-wrap:focus-within {
+border-color: rgba(245,158,11,0.4);
+box-shadow: 0 0 0 3px rgba(245,158,11,0.08);
+}
+
+.search-input {
+flex: 1;
+background: none;
+border: none;
+padding: 16px 20px;
+color: var(--text);
+font-family: 'DM Mono', monospace;
+font-size: 0.88rem;
+outline: none;
+}
+
+.search-input::placeholder { color: var(--text-dim); }
+
+.search-btn {
+background: var(--amber);
+border: none;
+padding: 16px 28px;
+color: var(--ink);
+font-family: 'Syne', sans-serif;
+font-size: 0.82rem;
+font-weight: 700;
+cursor: pointer;
+letter-spacing: 0.06em;
+text-transform: uppercase;
+transition: background 0.2s;
+}
+
+.search-btn:hover { background: var(--amber-dim); }
+
+.search-hints {
+margin-top: 12px;
+font-size: 0.72rem;
+color: var(--text-dim);
+}
+
+.search-hints span {
+color: var(--amber);
+cursor: pointer;
+opacity: 0.8;
+}
+
+.search-hints span:hover { opacity: 1; text-decoration: underline; }
+
+/* What we check */
+.checks-bar {
+display: flex;
+gap: 24px;
+flex-wrap: wrap;
+margin-top: 32px;
+padding-top: 32px;
+border-top: 1px solid var(--border);
+}
+
+.check-item {
+display: flex;
+align-items: center;
+gap: 8px;
+font-size: 0.72rem;
+color: var(--text-dim);
+letter-spacing: 0.04em;
+}
+
+.check-dot {
+width: 6px; height: 6px;
+border-radius: 50%;
+background: var(--amber);
+flex-shrink: 0;
+}
+
+/* Loading */
+.loading {
+display: none;
+padding: 60px 0;
+text-align: center;
+}
+
+.loading.active { display: block; }
+
+.terminal {
+background: var(--ink-mid);
+border: 1px solid var(--border);
+border-radius: 10px;
+padding: 24px;
+max-width: 500px;
+margin: 0 auto;
+text-align: left;
+}
+
+.terminal-bar {
+display: flex;
+gap: 6px;
+margin-bottom: 16px;
+}
+
+.t-dot {
+width: 10px; height: 10px;
+border-radius: 50%;
+}
+
+.t-dot:nth-child(1) { background: #ff5f57; }
+.t-dot:nth-child(2) { background: #febc2e; }
+.t-dot:nth-child(3) { background: #28c840; }
+
+.terminal-line {
+font-size: 0.75rem;
+color: var(--text-dim);
+margin-bottom: 6px;
+opacity: 0;
+animation: termAppear 0.3s forwards;
+}
+
+.terminal-line.done { color: var(--amber); }
+.terminal-line.active { color: var(--amber); }
+.terminal-line:nth-child(2) { animation-delay: 0.4s; }
+.terminal-line:nth-child(3) { animation-delay: 0.9s; }
+.terminal-line:nth-child(4) { animation-delay: 1.5s; }
+.terminal-line:nth-child(5) { animation-delay: 2.1s; }
+.terminal-line:nth-child(6) { animation-delay: 2.7s; }
+
+@keyframes termAppear { to { opacity: 1; } }
+
+.cursor {
+display: inline-block;
+width: 8px; height: 14px;
+background: var(--amber);
+animation: blink 1s infinite;
+vertical-align: middle;
+margin-left: 4px;
+}
+
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+/* Results */
+.results { display: none; padding-bottom: 80px; }
+.results.active { display: block; }
+
+/* Verdict banner */
+.verdict {
+border-radius: 12px;
+padding: 28px 32px;
+margin-bottom: 20px;
+display: flex;
+align-items: center;
+justify-content: space-between;
+gap: 24px;
+position: relative;
+overflow: hidden;
+}
+
+.verdict.verified {
+background: linear-gradient(135deg, rgba(245,158,11,0.08), rgba(22,27,34,0.9));
+border: 1px solid rgba(245,158,11,0.25);
+}
+
+.verdict.review {
+background: linear-gradient(135deg, rgba(245,158,11,0.08), rgba(22,27,34,0.9));
+border: 1px solid rgba(245,158,11,0.25);
+}
+
+.verdict.risk {
+background: linear-gradient(135deg, rgba(248,81,73,0.08), rgba(22,27,34,0.9));
+border: 1px solid rgba(248,81,73,0.25);
+}
+
+.verdict-left h2 {
+font-family: 'Syne', sans-serif;
+font-size: 1.6rem;
+font-weight: 800;
+letter-spacing: -0.02em;
+margin-bottom: 4px;
+}
+
+.verdict.verified h2 { color: var(--amber); }
+.verdict.review h2 { color: var(--amber); }
+.verdict.risk h2 { color: var(--red); }
+
+.verdict-name {
+font-size: 0.9rem;
+color: var(--text);
+margin-bottom: 8px;
+}
+
+.verdict-flags {
+display: flex;
+gap: 8px;
+flex-wrap: wrap;
+}
+
+.flag {
+font-size: 0.68rem;
+padding: 3px 10px;
+border-radius: 4px;
+letter-spacing: 0.04em;
+}
+
+.flag-green { background: rgba(245,158,11,0.1); color: var(--amber); border: 1px solid rgba(245,158,11,0.2); }
+.flag-amber { background: rgba(245,158,11,0.1); color: var(--amber); border: 1px solid rgba(245,158,11,0.2); }
+.flag-red { background: rgba(248,81,73,0.1); color: var(--red); border: 1px solid rgba(248,81,73,0.2); }
+
+.verdict-score {
+text-align: center;
+flex-shrink: 0;
+}
+
+.score-ring {
+width: 80px; height: 80px;
+border-radius: 50%;
+border: 3px solid;
+display: flex;
+align-items: center;
+justify-content: center;
+flex-direction: column;
+margin: 0 auto 8px;
+}
+
+.verdict.verified .score-ring { border-color: var(--amber); box-shadow: 0 0 20px rgba(245,158,11,0.2); }
+.verdict.review .score-ring { border-color: var(--amber); box-shadow: 0 0 20px rgba(245,158,11,0.2); }
+.verdict.risk .score-ring { border-color: var(--red); box-shadow: 0 0 20px rgba(248,81,73,0.2); }
+
+.score-num {
+font-family: 'Syne', sans-serif;
+font-size: 1.6rem;
+font-weight: 800;
+line-height: 1;
+}
+
+.verdict.verified .score-num { color: var(--amber); }
+.verdict.review .score-num { color: var(--amber); }
+.verdict.risk .score-num { color: var(--red); }
+
+.score-label {
+font-size: 0.55rem;
+letter-spacing: 0.1em;
+text-transform: uppercase;
+color: var(--text-dim);
+}
+
+.verdict-label {
+font-size: 0.62rem;
+letter-spacing: 0.1em;
+text-transform: uppercase;
+}
+
+.verdict.verified .verdict-label { color: var(--amber); }
+.verdict.review .verdict-label { color: var(--amber); }
+.verdict.risk .verdict-label { color: var(--red); }
+
+/* Grid */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+@media(max-width:680px) { .grid-2 { grid-template-columns: 1fr; } }
+
+/* Cards */
+.card {
+background: var(--card);
+border: 1px solid var(--border);
+border-radius: 10px;
+padding: 22px;
+backdrop-filter: blur(8px);
+}
+
+.card-title {
+font-size: 0.62rem;
+letter-spacing: 0.14em;
+text-transform: uppercase;
+color: var(--amber);
+margin-bottom: 16px;
+display: flex;
+align-items: center;
+gap: 8px;
+}
+
+.card-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+/* Register items */
+.register-item {
+display: flex;
+align-items: flex-start;
+gap: 12px;
+padding: 12px 0;
+border-bottom: 1px solid var(--border);
+}
+
+.register-item:last-child { border-bottom: none; }
+
+.reg-icon {
+width: 34px; height: 34px;
+border-radius: 8px;
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 0.85rem;
+flex-shrink: 0;
+}
+
+.reg-icon.pass { background: rgba(245,158,11,0.1); }
+.reg-icon.warn { background: rgba(245,158,11,0.1); }
+.reg-icon.fail { background: rgba(248,81,73,0.1); }
+
+.reg-name {
+font-size: 0.8rem;
+color: var(--text);
+font-weight: 500;
+margin-bottom: 2px;
+font-family: 'Syne', sans-serif;
+}
+
+.reg-result {
+font-size: 0.7rem;
+color: var(--text-dim);
+}
+
+.reg-result.pass { color: var(--amber); }
+.reg-result.warn { color: var(--amber); }
+.reg-result.fail { color: var(--red); }
+
+/* Data rows */
+.data-row {
+display: flex;
+justify-content: space-between;
+padding: 9px 0;
+border-bottom: 1px solid var(--border);
+gap: 16px;
+}
+
+.data-row:last-child { border-bottom: none; }
+.data-key { font-size: 0.72rem; color: var(--text-dim); }
+.data-val { font-size: 0.78rem; color: var(--text); text-align: right; }
+.data-val.green { color: var(--amber); }
+.data-val.amber { color: var(--amber); }
+.data-val.red { color: var(--red); }
+
+/* LBP licence card */
+.licence-card {
+background: rgba(245,158,11,0.04);
+border: 1px solid rgba(245,158,11,0.15);
+border-radius: 8px;
+padding: 16px;
+margin-bottom: 12px;
+}
+
+.licence-header {
+display: flex;
+justify-content: space-between;
+align-items: flex-start;
+margin-bottom: 10px;
+}
+
+.licence-class {
+font-family: 'Syne', sans-serif;
+font-size: 0.95rem;
+font-weight: 700;
+color: var(--amber);
+}
+
+.licence-number {
+font-size: 0.68rem;
+color: var(--text-dim);
+margin-top: 2px;
+}
+
+.licence-status {
+font-size: 0.65rem;
+padding: 3px 10px;
+border-radius: 4px;
+background: rgba(245,158,11,0.1);
+color: var(--amber);
+border: 1px solid rgba(245,158,11,0.2);
+letter-spacing: 0.06em;
+}
+
+/* AI summary */
+.ai-block {
+background: linear-gradient(135deg, rgba(88,166,255,0.05), rgba(22,27,34,0.9));
+border: 1px solid rgba(88,166,255,0.15);
+border-radius: 10px;
+padding: 24px;
+margin-bottom: 16px;
+position: relative;
+}
+
+.ai-label {
+font-size: 0.62rem;
+letter-spacing: 0.14em;
+text-transform: uppercase;
+color: var(--blue);
+margin-bottom: 10px;
+}
+
+.ai-text {
+font-family: 'Lora', serif;
+font-size: 0.95rem;
+line-height: 1.75;
+color: var(--text);
+font-style: italic;
+}
+
+/* Actions */
+.actions { display: flex; gap: 12px; margin-top: 24px; flex-wrap: wrap; }
+
+.btn {
+padding: 11px 22px;
+border-radius: 6px;
+font-family: 'Syne', sans-serif;
+font-size: 0.78rem;
+font-weight: 700;
+letter-spacing: 0.06em;
+text-transform: uppercase;
+cursor: pointer;
+border: none;
+transition: all 0.2s;
+}
+
+.btn-primary { background: var(--amber); color: var(--ink); }
+.btn-primary:hover { background: var(--amber-dim); transform: translateY(-1px); }
+.btn-secondary { background: transparent; color: var(--text); border: 1px solid var(--border); }
+.btn-secondary:hover { border-color: rgba(255,255,255,0.2); }
+
+/* Receipt */
+.receipt {
+display: flex;
+justify-content: space-between;
+align-items: center;
+padding: 10px 14px;
+background: rgba(255,255,255,0.02);
+border: 1px solid var(--border);
+border-radius: 6px;
+margin-top: 14px;
+}
+
+.receipt-id { font-size: 0.65rem; color: var(--text-dim); }
+.receipt-id span { color: var(--amber); }
+.receipt-hash { font-size: 0.6rem; color: var(--text-dim); opacity: 0.5; }
+
+.powered {
+text-align: center;
+padding: 20px 0;
+font-size: 0.62rem;
+color: var(--text-dim);
+opacity: 0.4;
+letter-spacing: 0.1em;
+}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <div class="brand-icon">💳</div>
+      <div>
+        <div class="brand-name">Waggle Logic</div>
+        <div class="brand-sub">Credit Intelligence</div>
+      </div>
+    </div>
+    <div class="header-badges">
+      <span class="chip chip-amber">PPSR</span>
+      <span class="chip chip-amber">Insolvency</span>
+      <span class="chip chip-amber">NZBN</span>
+      <span class="chip chip-green">Live Monitoring</span>
+    </div>
+  </header>
+
+  <div class="hero">
+    <div class="hero-eyebrow">Instant trade risk analytics</div>
+    <h1 class="hero-title">Know the risk.<br><em>Before you extend credit.</em></h1>
+    <p class="hero-sub">Cross-reference PPSR security interests, insolvency history, director networks for any NZ business.</p>
+
+    <div class="search-wrap">
+      <input class="search-input" id="searchInput" type="text" placeholder="Company name or NZBN number..." />
+      <button class="search-btn" onclick="runSearch()">Assess →</button>
+    </div>
+    <div class="search-hints">
+      Try: <span onclick="demo('Auckland Timber Supplies Ltd')">Auckland Timber Supplies Ltd</span> &nbsp;·&nbsp;
+      <span onclick="demo('Pacific Consulting Group')">Pacific Consulting Group</span>
+    </div>
+
+    <div class="checks-bar">
+      <div class="check-item"><div class="check-dot"></div>PPSR Security Interests</div>
+      <div class="check-item"><div class="check-dot"></div>Insolvency Register</div>
+      <div class="check-item"><div class="check-dot"></div>Director Network</div>
+      <div class="check-item"><div class="check-dot"></div>Disclose Investments</div>
+      <div class="check-item"><div class="check-dot"></div>AI Credit Score</div>
+    </div>
+  </div>
+
+  <div class="loading" id="loading">
+    <div class="terminal">
+      <div class="terminal-bar">
+        <div class="t-dot"></div><div class="t-dot"></div><div class="t-dot"></div>
+      </div>
+      <div class="terminal-line done">$ connecting to PPSR database...</div>
+      <div class="terminal-line done">$ checking insolvency register...</div>
+      <div class="terminal-line done">$ scanning director network...</div>
+      <div class="terminal-line done">$ querying disclose investments...</div>
+      <div class="terminal-line active">$ running credit scoring algorithm...<span class="cursor"></span></div>
+    </div>
+  </div>
+
+  <div class="results" id="results">
+
+    <div class="ai-block">
+      <div class="ai-label">⬡ Waggle AI Assessment</div>
+      <div class="ai-text" id="aiText"></div>
+    </div>
+
+    <div class="verdict" id="verdictCard">
+      <div class="verdict-left">
+        <div class="verdict-name" id="verdictName"></div>
+        <h2 id="verdictTitle"></h2>
+        <div class="verdict-flags" id="verdictFlags"></div>
+      </div>
+      <div class="verdict-score">
+        <div class="score-ring" id="scoreRing">
+          <div class="score-num" id="scoreNum"></div>
+          <div class="score-label">/ 10</div>
+        </div>
+        <div class="verdict-label" id="verdictLabel"></div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-title">Risk Checks</div>
+      <div id="registerChecks"></div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">PPSR Security Interests</div>
+        <div id="ppsrDetails"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Company Details</div>
+        <div id="companyDetails"></div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Insolvency History</div>
+        <div id="insolvencyHistory"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Director Check</div>
+        <div id="directorCheck"></div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-primary" onclick="alert('PDF export -- live when API keys arrive')">Download PDF Report</button>
+      <button class="btn btn-secondary" onclick="newSearch()">New Search</button>
+    </div>
+
+    <div class="receipt">
+      <div class="receipt-id">Receipt: <span id="receiptId"></span></div>
+      <div class="receipt-hash" id="receiptHash"></div>
+    </div>
+
+  </div>
+
+  <div class="powered">Waggle Logic · Credit Intelligence · PPSR · NZ Companies Office · Disclose</div>
+</div>
+
+<script>
+const MOCK = {
+  "Auckland Timber Supplies Ltd": {
+    verdict: "risk", score: 9.1, title: "CRITICAL RISK",
+    name: "Auckland Timber Supplies Ltd",
+    ai: "Auckland Timber Supplies Ltd presents a critical credit risk profile. Three PPSR security interests registered including ANZ Bank GSA. Voluntary administration in 2022. Director linked to two liquidated companies.",
+    flags: [{t:"flag-red",l:"3 PPSR interests"},{t:"flag-red",l:"Insolvency 2022"},{t:"flag-amber",l:"Director risk"},{t:"flag-amber",l:"Payment delays"}],
+    registers: [
+      {icon:"⚠️",cls:"warn",name:"PPSR Register",result:"3 security interests found",rc:"warn"},
+      {icon:"🏢",cls:"warn",name:"Companies Register",result:"Registered · Voluntary Administration 2022",rc:"warn"},
+      {icon:"👤",cls:"fail",name:"Disqualified Directors",result:"No matches found",rc:"pass"},
+      {icon:"🔒",cls:"warn",name:"PPSR Register",result:"3 registered security interests",rc:"warn"},
+    ],
+    ppsr: [
+      {k:"Security Interests", v:"3 registered", c:"red"},
+      {k:"Last Date", v:"Last Updated: 2023"},
+      {k:"Creditors", v:"ANZ Bank, Bank of New Zealand, Supplier"}
+    ],
+    company: [
+      {k:"NZBN", v:"9429-2345-6789-0"},
+      {k:"Status", v:"Voluntary Administration", c:"red"},
+      {k:"Incorporated", v:"January 2010"},
+      {k:"Directors", v:"3 active"},
+      {k:"GST", v:"Registered", c:"green"},
+      {k:"Address", v:"Auckland, Auckland"},
+    ],
+    insolvency: [
+      {k:"Event", v:"Voluntary Administration", r:"2022"},
+    ],
+    directors: [
+      {n:"John A. Smith", s:"Director since 2015", ok:false},
+      {n:"Jane B. Doe", s:"Director since 2018", ok:true},
+    ]
+  },
+  "Pacific Consulting Group": {
+    verdict: "verified", score: 1.8, title: "LOW RISK",
+    name: "Pacific Consulting Group",
+    ai: "Pacific Consulting Group presents a clean credit profile. No PPSR interests, no insolvency events, 11 years trading, directors clear.",
+    flags: [{t:"flag-green",l:"No PPSR"},{t:"flag-green",l:"No Insolvency"},{t:"flag-green",l:"Clean Directors"},{t:"flag-green",l:"11 Years Trading"}],
+    registers: [
+      {icon:"✅",cls:"pass",name:"PPSR Register",result:"No security interests found",rc:"pass"},
+      {icon:"🏢",cls:"pass",name:"Companies Register",result:"Registered · Active · 11 years",rc:"pass"},
+      {icon:"👤",cls:"pass",name:"Disqualified Directors",result:"No matches found",rc:"pass"},
+      {icon:"🔒",cls:"pass",name:"PPSR Register",result:"No security interests found",rc:"pass"},
+    ],
+    ppsr: [
+      {k:"Security Interests", v:"0 registered", c:"green"},
+      {k:"Financing Statements", v:"None found", c:"green"},
+    ],
+    company: [
+      {k:"NZBN", v:"9429-3456-7890-1"},
+      {k:"Status", v:"Registered", c:"green"},
+      {k:"Incorporated", v:"March 2012"},
+      {k:"Directors", v:"2 active"},
+      {k:"GST", v:"Registered", c:"green"},
+      {k:"Address", v:"Wellington, Wellington"},
+    ],
+    insolvency: [
+      {k:"Event", v:"No events", r:"N/A"},
+    ],
+    directors: [
+      {n:"Robert Chen", s:"Director since 2012", ok:true},
+      {n:"Emma Thompson", s:"Director since 2016", ok:true},
+    ]
+  }
+};
+
+const DEFAULT = {
+  verdict: "risk", score: 9.9, title: "UNKNOWN RISK -- MANUAL REVIEW REQUIRED",
+  name: "Unknown Company",
+  ai: "This business could not be verified against official databases. No records found in PPSR, Companies Office, or Insolvency registries.",
+  flags: [{t:"flag-red",l:"No PPSR"},{t:"flag-red",l:"No Insolvency"},{t:"flag-red",l:"No Directives"},{t:"flag-red",l:"No Records Found"}],
+  registers: [
+    {icon:"❌",cls:"fail",name:"PPSR Register",result:"No records found",rc:"fail"},
+    {icon:"⚠️",cls:"warn",name:"Companies Register",result:"No record found",rc:"warn"},
+    {icon:"🚨",cls:"fail",name:"Disqualified Directors",result:"No record found",rc:"fail"},
+    {icon:"🔒",cls:"fail",name:"PPSR Register",result:"No record found",rc:"fail"},
+  ],
+  ppsr: [
+    {k:"Security Interests", v:"No records found", c:"red"},
+    {k:"Date First Checked", v:"Today"},
+  ],
+  company: [
+    {k:"NZBN", v:"Not found"},
+    {k:"Status", v:"Unknown", c:"red"},
+    {k:"Incorporated", v:"Unknown"},
+    {k:"Directors", v:"Unknown"},
+    {k:"GST", v:"Unknown"},
+    {k:"Address", v:"Unknown"},
+  ],
+  insolvency: [
+    {k:"Event", v:"No events", r:"N/A"},
+  ],
+  directors: [
+    {n:"Unknown", s:"Status: Unknown", ok:false},
+  ]
+};
+
+function demo(name) {
+  document.getElementById('searchInput').value = name;
+  runSearch();
+}
+
+function runSearch() {
+  const q = document.getElementById('searchInput').value.trim();
+  if (!q) return;
+  document.getElementById('results').classList.remove('active');
+  document.getElementById('loading').classList.add('active');
+  setTimeout(() => {
+    document.getElementById('loading').classList.remove('active');
+    const data = MOCK[q] || {...DEFAULT, name: q};
+    render(data);
+    document.getElementById('results').classList.add('active');
+    document.getElementById('results').scrollIntoView({behavior:'smooth'});
+  }, 3000);
+}
+
+function render(d) {
+  document.getElementById('aiText').textContent = d.ai;
+
+  const vc = document.getElementById('verdictCard');
+  vc.className = 'verdict ' + d.verdict;
+  document.getElementById('verdictName').textContent = d.name;
+  document.getElementById('verdictTitle').textContent = d.title;
+  document.getElementById('scoreRing').className = 'score-ring';
+  document.getElementById('scoreNum').textContent = d.score.toFixed(1);
+  document.getElementById('verdictLabel').textContent = d.verdict.toUpperCase();
+
+  document.getElementById('verdictFlags').innerHTML = d.flags.map(f =>
+    `<span class="flag ${f.t}">${f.l}</span>`).join('');
+
+  document.getElementById('registerChecks').innerHTML = d.registers.map(r => `
+    <div class="register-item">
+      <div class="reg-icon ${r.cls}">${r.icon}</div>
+      <div>
+        <div class="reg-name">${r.name}</div>
+        <div class="reg-result ${r.rc}">${r.result}</div>
+      </div>
+    </div>`).join('');
+
+  document.getElementById('ppsrDetails').innerHTML = d.ppsr.map(r =>
+    `<div class="data-row"><div class="data-key">${r.k}</div><div class="data-val ${r.c||''}">${r.v}</div></div>`).join('');
+
+  document.getElementById('companyDetails').innerHTML = d.company.map(r =>
+    `<div class="data-row"><div class="data-key">${r.k}</div><div class="data-val ${r.c||''}">${r.v}</div></div>`).join('');
+
+  document.getElementById('insolvencyHistory').innerHTML = d.insolvency.map(i =>
+    `<div class="data-row"><div class="data-key">${i.k}</div><div class="data-val ${i.c||''}">${i.v}</div></div>`).join('');
+
+  document.getElementById('directorCheck').innerHTML = d.directors.map(dir => `
+    <div class="register-item">
+      <div class="reg-icon ${dir.ok?'pass':'fail'}">${dir.ok?'✓':'⚠️'}</div>
+      <div>
+        <div class="reg-name">${dir.n}</div>
+        <div class="reg-result ${dir.ok?'pass':'fail'}">${dir.s}</div>
+      </div>
+    </div>`).join('');
+
+  document.getElementById('receiptId').textContent = 'WL-CI-' + Math.random().toString(36).substr(2,9).toUpperCase();
+  document.getElementById('receiptHash').textContent = 'sha256:' + Array.from({length:16},()=>Math.floor(Math.random()*16).toString(16)).join('') + '...';
+}
+
+function newSearch() {
+  document.getElementById('results').classList.remove('active');
+  document.getElementById('searchInput').value = '';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+document.getElementById('searchInput').addEventListener('keypress', e => {
+  if (e.key === 'Enter') runSearch();
+});
+</script>
+
+</body>
+</html>
